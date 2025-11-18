@@ -9,7 +9,10 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
+import java.util.function.Consumer;
+//import de firebase
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.DocumentSnapshot;
 public class ProductoRepository {
 
     public static List<Producto> cargarProductos(Context context) {
@@ -100,5 +103,36 @@ public class ProductoRepository {
         p2.img = R.drawable.zelda_2;
 
         return Arrays.asList(p1, p2);
+    }
+
+    public static void cargarDesdeFirebase(Context context, Consumer<List<Producto>> callback) {
+        //Log.d("Firebase", "LLEGA: ");
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        db.collection("productos").get().addOnSuccessListener(query -> {
+            List<Producto> lista = new ArrayList<>();
+            for (DocumentSnapshot doc : query.getDocuments()) {
+                Producto producto = new Producto();
+                producto.id = doc.getLong("id").intValue();
+                producto.title = doc.getString("title");
+                //Log.d("Firebase", "producto leido: " + doc.getString("title"));
+                producto.description = doc.getString("description");
+                producto.price = doc.getLong("price").intValue();
+                producto.code = doc.getString("code");
+                producto.status = doc.getBoolean("status");
+                producto.platform = doc.getString("platform");
+                producto.topSell = doc.getBoolean("topSell");
+                producto.genre = doc.getString("genre");
+                producto.category = doc.getString("category");
+
+                String imgName = doc.getString("img");
+                int resId = context.getResources().getIdentifier(imgName, "drawable", context.getPackageName());
+                producto.img = (resId != 0) ? resId : R.drawable.imagen_no_disponible;
+                lista.add(producto);
+            }
+            callback.accept(lista);
+        }).addOnFailureListener(e -> {
+            e.printStackTrace();
+            callback.accept(new ArrayList<>());
+        });
     }
 }

@@ -37,12 +37,21 @@ public class MainActivity extends AppCompatActivity {
         fabCarrito = findViewById(R.id.fabCarrito);
 
         // Cargar productos desde el repositorio
-        productos.addAll(ProductoRepository.cargarProductos(this));
+        //productos.addAll(ProductoRepository.cargarProductos(this));
 
         // Configurar RecyclerView con adapter que actualiza el badge y el carrito
-        adapter = new ProductoAdapter(this, productos, badgeCantidad, carrito);
-        recyclerProductos.setLayoutManager(new GridLayoutManager(this, 2));
-        recyclerProductos.setAdapter(adapter);
+        //adapter = new ProductoAdapter(this, productos, badgeCantidad, carrito);
+        //recyclerProductos.setLayoutManager(new GridLayoutManager(this, 2));
+        //recyclerProductos.setAdapter(adapter);
+
+        //Se cambio el metodo ahora cargar productos desde el Firebase
+        ProductoRepository.cargarDesdeFirebase(this, productos -> {
+            this.productos.addAll(productos);
+
+            adapter = new ProductoAdapter(this, this.productos, badgeCantidad, carrito);
+            recyclerProductos.setLayoutManager(new GridLayoutManager(this, 2));
+            recyclerProductos.setAdapter(adapter);
+        });
 
         // Botón para agregar productos demo
         btnDemo.setOnClickListener(v -> {
@@ -50,6 +59,8 @@ public class MainActivity extends AppCompatActivity {
             adapter.notifyDataSetChanged();
             Toast.makeText(this, "Productos demo cargados.", Toast.LENGTH_SHORT).show();
         });
+
+
 
         // Botón flotante para abrir el carrito
         fabCarrito.setOnClickListener(v -> {
