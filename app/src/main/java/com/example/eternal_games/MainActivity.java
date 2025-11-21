@@ -53,14 +53,13 @@ public class MainActivity extends AppCompatActivity {
             recyclerProductos.setAdapter(adapter);
         });
 
-        // Botón para agregar productos demo
+
+        // Botón para agregar productos demo desde JSON
         btnDemo.setOnClickListener(v -> {
             productos.addAll(ProductoRepository.obtenerProductosDemo());
             adapter.notifyDataSetChanged();
             Toast.makeText(this, "Productos demo cargados.", Toast.LENGTH_SHORT).show();
         });
-
-
 
         // Botón flotante para abrir el carrito
         fabCarrito.setOnClickListener(v -> {
@@ -69,9 +68,13 @@ public class MainActivity extends AppCompatActivity {
                 return;
             }
 
+            //Intent intent = new Intent(this, CarritoActivity.class);
+            //intent.putExtra("carrito", new ArrayList<>(carrito)); // Serializable
+            //startActivity(intent);
+            //CAMBIAMOS STARACTIVITY POR STARACTIVITYRESULT PARA VER RESULTADO ELEGUIMSO 1001
             Intent intent = new Intent(this, CarritoActivity.class);
             intent.putExtra("carrito", new ArrayList<>(carrito)); // Serializable
-            startActivity(intent);
+            startActivityForResult(intent, 1001);
         });
 
         // Inicializar badge en 0 (oculto)
@@ -87,5 +90,29 @@ public class MainActivity extends AppCompatActivity {
                 badgeCantidad.setVisibility(TextView.GONE);
             }
         }
+    }
+
+    //NUEVO METODO AL MOMENTO DE VOLVER AL ACTIVITY VERIFICA PARA ACTUALIZAR BADGE
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == 1001 && resultCode == RESULT_OK && data != null) {
+            ArrayList<CarritoItem> carritoActualizado =
+                    (ArrayList<CarritoItem>) data.getSerializableExtra("carritoActualizado");
+
+            if (carritoActualizado != null) {
+                carrito.clear();
+                carrito.addAll(carritoActualizado);
+                actualizarBadge(calcularCantidadTotal(carrito));
+            }
+        }
+    }
+    private int calcularCantidadTotal(List<CarritoItem> carrito) {
+        int total = 0;
+        for (CarritoItem item : carrito) {
+            total += item.cantidad;
+        }
+        return total;
     }
 }

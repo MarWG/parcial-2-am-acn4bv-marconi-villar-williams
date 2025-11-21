@@ -16,6 +16,8 @@ public class CarritoAdapter extends RecyclerView.Adapter<CarritoAdapter.CarritoV
 
     private Context context;
     private List<CarritoItem> carrito;
+    //USAMOS INTERFACE CREADA
+    private CarritoCallback callback;
 
     public CarritoAdapter(Context context, List<CarritoItem> carrito) {
         this.context = context;
@@ -27,7 +29,6 @@ public class CarritoAdapter extends RecyclerView.Adapter<CarritoAdapter.CarritoV
     public CarritoViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View vista = LayoutInflater.from(context).inflate(R.layout.item_carrito, parent, false);
         return new CarritoViewHolder(vista);
-
     }
 
     @Override
@@ -39,6 +40,7 @@ public class CarritoAdapter extends RecyclerView.Adapter<CarritoAdapter.CarritoV
         holder.txtPrecioUnitario.setText("Precio unitario: " + item.producto.price);
         holder.txtCantidad.setText("Cantidad: " + item.cantidad);
         holder.txtTotal.setText("Total: " +item.getTotal());
+
         //evento boton eliminar carrito
         holder.btnEliminar.setOnClickListener(v -> {
             int posicion = holder.getAdapterPosition();
@@ -46,10 +48,12 @@ public class CarritoAdapter extends RecyclerView.Adapter<CarritoAdapter.CarritoV
                 carrito.remove(posicion);
                 notifyItemRemoved(posicion);
                 notifyItemRangeChanged(posicion, carrito.size());
-
+                //Verificmos
+                if (callback != null) {
+                    callback.onCarritoActualizado(carrito);
+                }
             }
         });
-
     }
 
     @Override
@@ -58,6 +62,7 @@ public class CarritoAdapter extends RecyclerView.Adapter<CarritoAdapter.CarritoV
     }
 
     public static class CarritoViewHolder extends RecyclerView.ViewHolder {
+        //AGREGAMOS btnEliminar A LA VISTA
         ImageView imgProducto , btnEliminar;
         TextView txtTitulo, txtPrecioUnitario, txtCantidad, txtTotal;
 
@@ -71,5 +76,10 @@ public class CarritoAdapter extends RecyclerView.Adapter<CarritoAdapter.CarritoV
             btnEliminar = itemView.findViewById(R.id.btnEliminar); // nuevo BOTON
 
         }
+    }
+
+    //USAMOS INTERFACE CREADA
+    public void setCallback(CarritoCallback callback) {
+        this.callback = callback;
     }
 }

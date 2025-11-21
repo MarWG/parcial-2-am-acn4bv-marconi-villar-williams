@@ -1,5 +1,6 @@
 package com.example.eternal_games;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.widget.ImageButton;
 import android.widget.TextView;
@@ -35,6 +36,13 @@ public class CarritoActivity extends AppCompatActivity {
         // Configurar RecyclerView
         recyclerCarrito = findViewById(R.id.recyclerCarrito);
         CarritoAdapter adapter = new CarritoAdapter(this, carrito);
+
+        //USAMOS PARA ACTUALIZAR EN CASO QUE ALLA ELIMINADO
+        adapter.setCallback(nuevoCarrito -> {
+            actualizarResumen(); // ya usa la lista "carrito" directamente
+        });
+        ////////////////////////////////////////////////////////////////////
+
         recyclerCarrito.setLayoutManager(new LinearLayoutManager(this));
         recyclerCarrito.setAdapter(adapter);
 
@@ -48,7 +56,15 @@ public class CarritoActivity extends AppCompatActivity {
 
         // Botón para volver a MainActivity
         ImageButton btnInicio = findViewById(R.id.btnInicio);
-        btnInicio.setOnClickListener(v -> finish());
+        //btnInicio.setOnClickListener(v -> finish());
+
+        //HACEMOS EL FINIS CON INTENTE PARA DEVOLVER CANTIDAD DE ITEM AL BADGET
+        btnInicio.setOnClickListener(v -> {
+            Intent resultIntent = new Intent();
+            resultIntent.putExtra("carritoActualizado", carrito);
+            setResult(RESULT_OK, resultIntent);
+            finish();
+        });
 
         // Simulacion de boton finalizar compra
         btnFinalizarCompra.setOnClickListener(v -> {

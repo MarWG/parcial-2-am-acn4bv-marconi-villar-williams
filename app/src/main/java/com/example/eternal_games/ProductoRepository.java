@@ -1,6 +1,7 @@
 package com.example.eternal_games;
 
 import android.content.Context;
+import android.util.Log;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -13,6 +14,7 @@ import java.util.function.Consumer;
 //import de firebase
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.DocumentSnapshot;
+
 public class ProductoRepository {
 
     public static List<Producto> cargarProductos(Context context) {
@@ -105,6 +107,7 @@ public class ProductoRepository {
         return Arrays.asList(p1, p2);
     }
 
+
     public static void cargarDesdeFirebase(Context context, Consumer<List<Producto>> callback) {
         //Log.d("Firebase", "LLEGA: ");
         FirebaseFirestore db = FirebaseFirestore.getInstance();
@@ -119,14 +122,17 @@ public class ProductoRepository {
                 producto.price = doc.getLong("price").intValue();
                 producto.code = doc.getString("code");
                 producto.status = doc.getBoolean("status");
-                producto.platform = doc.getString("platform");
-                producto.topSell = doc.getBoolean("topSell");
-                producto.genre = doc.getString("genre");
-                producto.category = doc.getString("category");
+                //Se pusieron por default algunas propiedades hasta definir modelo final desde react
+                producto.platform = ""; //doc.getString("platform");
+                producto.topSell = true; //doc.getBoolean("topSell");
+                producto.genre = ""; //doc.getString("genre");
+                producto.category = ""; //doc.getString("category");
 
+                //Falta definr donde levantamso imagen
                 String imgName = doc.getString("img");
                 int resId = context.getResources().getIdentifier(imgName, "drawable", context.getPackageName());
                 producto.img = (resId != 0) ? resId : R.drawable.imagen_no_disponible;
+
                 lista.add(producto);
             }
             callback.accept(lista);
