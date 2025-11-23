@@ -2,10 +2,13 @@ package com.example.eternal_games;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.PopupMenu;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -39,6 +42,9 @@ public class MainActivity extends AppCompatActivity {
         btnDemo = findViewById(R.id.btnDemo);
         badgeCantidad = findViewById(R.id.badgeCantidad);
         fabCarrito = findViewById(R.id.fabCarrito);
+        /// cerrar sesion
+        ImageButton btnCerrarSesion = findViewById(R.id.btnCerrarSesion);
+        MenuCerrarSesion(btnCerrarSesion);
 
         // Cargar productos desde el repositorio
         //productos.addAll(ProductoRepository.cargarProductos(this));
@@ -118,5 +124,35 @@ public class MainActivity extends AppCompatActivity {
             total += item.cantidad;
         }
         return total;
+    }
+
+    private void MenuCerrarSesion(ImageButton btnCerrarSesion) {
+        btnCerrarSesion.setOnClickListener(v -> mostrarMenuCerrarSesion(v));
+    }
+
+    /// delegamos la logica aca luego vemso que hacemos
+    private void mostrarMenuCerrarSesion(View anchor) {
+        PopupMenu popup = new PopupMenu(this, anchor);
+        popup.getMenu().add("Cerrar sesión");
+
+        popup.setOnMenuItemClickListener(item -> {
+            if ("Cerrar sesión".equals(item.getTitle())) {
+                cerrarSesion();
+                return true;
+            }
+            return false;
+        });
+
+        popup.show();
+    }
+
+    private void cerrarSesion() {
+        repo.cerrarSesion();
+        navegarAlLogin();
+    }
+
+    private void navegarAlLogin() {
+        startActivity(new Intent(this, LoginActivity.class));
+        finish();
     }
 }

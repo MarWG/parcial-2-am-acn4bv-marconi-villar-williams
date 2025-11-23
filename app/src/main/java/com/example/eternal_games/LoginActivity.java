@@ -2,44 +2,49 @@ package com.example.eternal_games;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
+
 import com.google.android.gms.auth.api.signin.*;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.tasks.Task;
-import com.google.firebase.auth.*;
+import com.google.firebase.auth.FirebaseAuth;
 
 public class LoginActivity extends AppCompatActivity {
 
-    private FirebaseAuth firebaseAuth;
+    private FirebaseRepository repo;
     private GoogleSignInClient googleSignInClient;
     private ActivityResultLauncher<Intent> signInLauncher;
 
     private EditText etUsuario, etContrasena;
-    private Button btnLogin;
+    private TextView headerError;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
-        firebaseAuth = FirebaseAuth.getInstance();
+        repo = new FirebaseRepository();
 
-        // Referencias
         etUsuario = findViewById(R.id.etUsuario);
         etContrasena = findViewById(R.id.etContrasena);
-        btnLogin = findViewById(R.id.btnLogin);
-        TextView linkRegistro = findViewById(R.id.linkRegistro);
-        TextView headerError = findViewById(R.id.headerError);
+        headerError = findViewById(R.id.headerError);
 
-        // Google Sign-In
+        Button btnLogin = findViewById(R.id.btnLogin);
+        TextView linkRegistro = findViewById(R.id.linkRegistro);
+
+        // Login con email/contraseña
+        btnLogin.setOnClickListener(v -> login());
+
+        // Configuración Google Sign-In
         googleSignInClient = GoogleSignInManager.configurarGoogle(this);
+
         signInLauncher = registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),
                 result -> {
@@ -50,21 +55,13 @@ public class LoginActivity extends AppCompatActivity {
                             if (account != null) {
                                 GoogleSignInManager.autenticarConFirebase(
                                         account.getIdToken(),
-                                        firebaseAuth,
+                                        FirebaseAuth.getInstance(),
                                         this,
-                                        () -> {
-                                            startActivity(new Intent(this, MainActivity.class));
-                                            finish();
-                                        }
+                                        this::navegarAMain
                                 );
                             }
                         } catch (ApiException e) {
-                            //Toast.makeText(this, "Error al iniciar con Google", Toast.LENGTH_SHORT).show();
-                            //Mostramos error een el header
-                            String mensajeError = "Error al iniciar con Google";
-                            headerError.setText(mensajeError);
-                            headerError.setTextColor(ContextCompat.getColor(this, android.R.color.holo_red_dark));
-                            headerError.setVisibility(View.VISIBLE);
+                            mostrarError("Error al iniciar con Google");
                         }
                     }
                 }
@@ -75,5 +72,32 @@ public class LoginActivity extends AppCompatActivity {
             signInLauncher.launch(signInIntent);
         });
     }
-    // Login con email/contraseña. Falta realizar login tradicional con el registro
+
+    private void login() {
+        String email = etUsuario.getText().toString().trim();
+        String password = etContrasena.getText().toString().trim();
+
+        if (email.isEmpty() || password.isEmpty()) {
+            mostrarError("Completa todos los campos");
+            return;
+        }
+        repo.login(email, password,
+                user -> navegarAMain(),
+                error -> mostrarError("Error: " + error.getMessage())
+        );
+    }
+
+    // mostrar error en el la vista
+    private void mostrarError(String mensaje) {
+        headerError.setText(mensaje);
+        headerError.setTextColor(ContextCompat.getColor(this, android.R.color.holo_red_dark));
+        headerError.setVisibility(TextView.VISIBLE);
+    }
+
+    // va al main activity
+    private void navegarAMain() {
+        headerError.setVisibility(TextView.GONE);
+        startActivity(new Intent(this, MainActivity.class));
+        finish();
+    }
 }
