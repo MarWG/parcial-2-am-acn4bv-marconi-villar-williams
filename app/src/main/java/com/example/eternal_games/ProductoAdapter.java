@@ -1,6 +1,7 @@
 package com.example.eternal_games;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -8,10 +9,8 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
-
 import java.util.List;
 
 public class ProductoAdapter extends RecyclerView.Adapter<ProductoAdapter.ProductoViewHolder> {
@@ -20,12 +19,22 @@ public class ProductoAdapter extends RecyclerView.Adapter<ProductoAdapter.Produc
     private List<Producto> productos;
     private TextView badgeCantidad;
     private List<CarritoItem> carrito;
+    private FirebaseRepository firebaseRepository;
+    private String userId;
 
-    public ProductoAdapter(Context context, List<Producto> productos, TextView badgeCantidad, List<CarritoItem> carrito) {
+
+    public ProductoAdapter(Context context,
+                           List<Producto> productos,
+                           TextView badgeCantidad,
+                           List<CarritoItem> carrito,
+                           FirebaseRepository firebaseRepository,
+                           String userId) {
         this.context = context;
         this.productos = productos;
         this.badgeCantidad = badgeCantidad;
         this.carrito = carrito;
+        this.firebaseRepository = firebaseRepository;
+        this.userId = userId;
     }
 
     @NonNull
@@ -46,16 +55,28 @@ public class ProductoAdapter extends RecyclerView.Adapter<ProductoAdapter.Produc
         holder.btnAgregar.setOnClickListener(v -> {
             boolean yaExiste = false;
             for (CarritoItem item : carrito) {
-                if (item.producto.id == p.id) {
+                if (item.producto.id.equals(p.id)) { //usar equals si es String
                     item.cantidad++;
                     yaExiste = true;
+
+                    //Actualizar cantidad en Firebase
+                    firebaseRepository.agregarAlCarrito(userId, p.id, item.cantidad,
+                            aVoid -> Log.d("Carrito", "Cantidad actualizada en Firebase"),
+                            e -> Log.e("Carrito", "Error al actualizar", e)
+                    );
                     break;
                 }
             }
+
             if (!yaExiste) {
                 carrito.add(new CarritoItem(p, 1));
-            }
 
+                //Agregar nuevo producto en Firebase
+                firebaseRepository.agregarAlCarrito(userId, p.id, 1,
+                        aVoid -> Log.d("Carrito", "Producto agregado en Firebase"),
+                        e -> Log.e("Carrito", "Error al agregar", e)
+                );
+            }
             if (badgeCantidad != null) {
                 int totalUnidades = 0;
                 for (CarritoItem item : carrito) {

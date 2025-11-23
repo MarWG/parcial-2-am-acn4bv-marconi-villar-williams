@@ -15,6 +15,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import java.util.ArrayList;
 import java.util.List;
 
+
 public class MainActivity extends AppCompatActivity {
 
     private RecyclerView recyclerProductos;
@@ -55,10 +56,15 @@ public class MainActivity extends AppCompatActivity {
         //recyclerProductos.setAdapter(adapter);
 
         //Se cambio el metodo ahora cargar productos desde el Firebase
+
+        String userId = repo.obtenerUserId();
+        // Cargar productos desde Firebase
         ProductoRepository.cargarDesdeFirebase(this, productos -> {
             this.productos.addAll(productos);
-
-            adapter = new ProductoAdapter(this, this.productos, badgeCantidad, carrito);
+            // Pasar repo y userId al adapter
+            adapter = new ProductoAdapter(
+                    this, this.productos, badgeCantidad, carrito, repo, userId
+            );
             recyclerProductos.setLayoutManager(new GridLayoutManager(this, 2));
             recyclerProductos.setAdapter(adapter);
         });

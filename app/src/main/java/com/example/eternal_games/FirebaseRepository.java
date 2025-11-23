@@ -5,7 +5,13 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.SetOptions;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class FirebaseRepository {
     private final FirebaseAuth auth;
@@ -47,5 +53,27 @@ public class FirebaseRepository {
         auth.createUserWithEmailAndPassword(email, password)
                 .addOnSuccessListener(success)
                 .addOnFailureListener(failure);
+    }
+    // agregar producto carrito
+    public void agregarAlCarrito(String userId, String idProducto, int cantidad,
+                                 OnSuccessListener<Void> success,
+                                 OnFailureListener failure) {
+        DocumentReference itemRef = db.collection("users")
+                .document(userId)
+                .collection("cart")
+                .document(idProducto);
+
+        Map<String, Object> item = new HashMap<>();
+        item.put("idProducto", idProducto);
+        item.put("cantidad", cantidad);
+        item.put("fechaAgregado", FieldValue.serverTimestamp());
+
+        itemRef.set(item, SetOptions.merge())
+                .addOnSuccessListener(success)
+                .addOnFailureListener(failure);
+    }
+    public String obtenerUserId() {
+        FirebaseUser user = obtenerUsuarioActual();
+        return user != null ? user.getUid() : null;
     }
 }
