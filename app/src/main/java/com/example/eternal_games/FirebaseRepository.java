@@ -106,4 +106,23 @@ public class FirebaseRepository {
                 })
                 .addOnFailureListener(failure);
     }
+
+    ///obtenemos mail del usuairo conecatdo
+    public String obtenerMailActual() {
+        FirebaseUser user = auth.getCurrentUser();
+        return (user != null) ? user.getEmail() : null;
+    }
+
+    ///elimina productos del carrito del usuario en fiberbase
+    public void eliminarDelCarrito(String userId, String productoId,
+                                   OnSuccessListener<Void> success,
+                                   OnFailureListener failure) {
+        db.collection("users")
+                .document(userId)
+                .collection("cart")
+                .document(productoId)
+                .delete()
+                .addOnSuccessListener(success)
+                .addOnFailureListener(failure);
+    }
 }

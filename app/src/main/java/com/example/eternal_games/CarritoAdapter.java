@@ -45,12 +45,14 @@ public class CarritoAdapter extends RecyclerView.Adapter<CarritoAdapter.CarritoV
         holder.btnEliminar.setOnClickListener(v -> {
             int posicion = holder.getAdapterPosition();
             if (posicion != RecyclerView.NO_POSITION) {
+                CarritoItem eliminado = carrito.get(posicion);
                 carrito.remove(posicion);
                 notifyItemRemoved(posicion);
                 notifyItemRangeChanged(posicion, carrito.size());
                 //Verificmos
                 if (callback != null) {
                     callback.onCarritoActualizado(carrito);
+                    callback.onProductoEliminado(eliminado); // avisamos cual se borror
                 }
             }
         });

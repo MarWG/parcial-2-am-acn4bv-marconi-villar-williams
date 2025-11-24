@@ -3,6 +3,7 @@ package com.example.eternal_games;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
@@ -140,6 +141,10 @@ public class MainActivity extends AppCompatActivity {
     /// delegamos la logica aca luego vemso que hacemos
     private void mostrarMenuCerrarSesion(View anchor) {
         PopupMenu popup = new PopupMenu(this, anchor);
+
+        /// mostramos ifno del usuario por el momento solo mail
+        MenuItem infoMail = popup.getMenu().add(repo.obtenerMailActual());
+        infoMail.setEnabled(false); // lo muestra en gris, sin acción
         popup.getMenu().add("Cerrar sesión");
 
         popup.setOnMenuItemClickListener(item -> {

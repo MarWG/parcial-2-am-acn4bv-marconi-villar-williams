@@ -12,6 +12,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class CarritoActivity extends AppCompatActivity {
 
@@ -36,10 +37,26 @@ public class CarritoActivity extends AppCompatActivity {
         // Configurar RecyclerView
         recyclerCarrito = findViewById(R.id.recyclerCarrito);
         CarritoAdapter adapter = new CarritoAdapter(this, carrito);
+        adapter.setCallback(new CarritoCallback() {
+            @Override
+            public void onCarritoActualizado(List<CarritoItem> nuevoCarrito) {
+                actualizarResumen(); // recalcula total y cantidad
+            }
 
-        //USAMOS PARA ACTUALIZAR EN CASO QUE HAYA ELIMINADO
-        adapter.setCallback(nuevoCarrito -> {
-            actualizarResumen(); // ya usa la lista "carrito" directamente
+            @Override
+            public void onProductoEliminado(CarritoItem eliminado) {
+                FirebaseRepository repo = new FirebaseRepository();
+                String userId = repo.obtenerUserId();
+
+                repo.eliminarDelCarrito(userId, eliminado.producto.id,
+                        aVoid -> Toast.makeText(CarritoActivity.this,
+                                eliminado.producto.title + " eliminado del carrito",
+                                Toast.LENGTH_SHORT).show(),
+                        e -> Toast.makeText(CarritoActivity.this,
+                                "Error al eliminar de Firebase",
+                                Toast.LENGTH_SHORT).show()
+                );
+            }
         });
         ////////////////////////////////////////////////////////////////////
 
