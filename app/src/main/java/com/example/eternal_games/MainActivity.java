@@ -2,6 +2,7 @@ package com.example.eternal_games;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
@@ -55,19 +56,19 @@ public class MainActivity extends AppCompatActivity {
         //recyclerProductos.setLayoutManager(new GridLayoutManager(this, 2));
         //recyclerProductos.setAdapter(adapter);
 
-        //Se cambio el metodo ahora cargar productos desde el Firebase
-
+        //Se cambio el metodo ahora cargar productos desde el Firebase con su carrito
         String userId = repo.obtenerUserId();
+        cargarDatosIniciales(userId);
         // Cargar productos desde Firebase
-        ProductoRepository.cargarDesdeFirebase(this, productos -> {
-            this.productos.addAll(productos);
-            // Pasar repo y userId al adapter
-            adapter = new ProductoAdapter(
-                    this, this.productos, badgeCantidad, carrito, repo, userId
-            );
-            recyclerProductos.setLayoutManager(new GridLayoutManager(this, 2));
-            recyclerProductos.setAdapter(adapter);
-        });
+        //ProductoRepository.cargarDesdeFirebase(this, productos -> {
+        //    this.productos.addAll(productos);
+        // Pasar repo y userId al adapter
+        //    adapter = new ProductoAdapter(
+        //            this, this.productos, badgeCantidad, carrito, repo, userId
+        //    );
+        //    recyclerProductos.setLayoutManager(new GridLayoutManager(this, 2));
+        //    recyclerProductos.setAdapter(adapter);
+        //});
 
 
         // Botón para agregar productos demo desde JSON --> quedo inactivo luego vemso que hacemos
@@ -160,5 +161,39 @@ public class MainActivity extends AppCompatActivity {
     private void navegarAlLogin() {
         startActivity(new Intent(this, LoginActivity.class));
         finish();
+    }
+
+    private void cargarDatosIniciales(String userId) {
+        ProductoRepository.cargarDesdeFirebase(this, productos -> {
+            this.productos.clear();
+            this.productos.addAll(productos);
+
+            repo.obtenerCarritoUsuario(userId,
+                    carritoItems -> {
+                        carrito.clear();
+                        List<CarritoItem> carritoConDetalles = new ArrayList<>();
+
+                        for (CarritoItem item : carritoItems) {
+                            for (Producto p : productos) {
+                                if (p.id.equals(item.producto.id)) {
+                                    carritoConDetalles.add(new CarritoItem(p, item.cantidad));
+                                    break;
+                                }
+                            }
+                        }
+
+                        carrito.addAll(carritoConDetalles);
+                        actualizarBadge(calcularCantidadTotal(carrito));
+
+                        adapter = new ProductoAdapter(this, productos, badgeCantidad, carrito, repo, userId);
+                        recyclerProductos.setLayoutManager(new GridLayoutManager(this, 2));
+                        recyclerProductos.setAdapter(adapter);
+                    },
+                    e -> {
+                        Log.e("Carrito", "Error al cargar carrito", e);
+                        Toast.makeText(this, "Error al cargar el carrito", Toast.LENGTH_SHORT).show();
+                    }
+            );
+        });
     }
 }

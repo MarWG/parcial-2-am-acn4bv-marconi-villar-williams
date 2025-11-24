@@ -6,11 +6,14 @@ import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.SetOptions;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class FirebaseRepository {
@@ -75,5 +78,32 @@ public class FirebaseRepository {
     public String obtenerUserId() {
         FirebaseUser user = obtenerUsuarioActual();
         return user != null ? user.getUid() : null;
+    }
+
+    // obtener carrito del usuario
+    public void obtenerCarritoUsuario(String userId,
+                                      OnSuccessListener<List<CarritoItem>> success,
+                                      OnFailureListener failure) {
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+
+        db.collection("users")
+                .document(userId)
+                .collection("cart")
+                .get()
+                .addOnSuccessListener(querySnapshot -> {
+                    List<CarritoItem> carrito = new ArrayList<>();
+                    for (DocumentSnapshot doc : querySnapshot) {
+                        String idProducto = doc.getString("idProducto");
+                        Long cantidad = doc.getLong("cantidad");
+
+                        if (idProducto != null && cantidad != null) {
+                            Producto producto = new Producto();
+                            producto.id = idProducto; // aca mapear mas campos si neseistamos
+                            carrito.add(new CarritoItem(producto, cantidad.intValue()));
+                        }
+                    }
+                    success.onSuccess(carrito);
+                })
+                .addOnFailureListener(failure);
     }
 }
