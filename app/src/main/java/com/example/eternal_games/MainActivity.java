@@ -45,6 +45,8 @@ public class MainActivity extends AppCompatActivity {
         btnDemo = findViewById(R.id.btnDemo);
         badgeCantidad = findViewById(R.id.badgeCantidad);
         fabCarrito = findViewById(R.id.fabCarrito);
+        btnDemo = findViewById(R.id.btnDemo);
+
         /// cerrar sesion
         ImageButton btnCerrarSesion = findViewById(R.id.btnCerrarSesion);
         MenuCerrarSesion(btnCerrarSesion);
@@ -61,12 +63,14 @@ public class MainActivity extends AppCompatActivity {
         String userId = repo.obtenerUserId();
         cargarDatosIniciales(userId);
 
-        // Botón para agregar productos demo desde JSON --> quedo inactivo luego vemso que hacemos
-        //btnDemo.setOnClickListener(v -> {
-        //    productos.addAll(ProductoRepository.obtenerProductosDemo());
-        //    adapter.notifyDataSetChanged();
-        //    Toast.makeText(this, "Productos demo cargados.", Toast.LENGTH_SHORT).show();
-        //});
+        // Botón para agregar productos demo hacia Firebase
+        btnDemo.setOnClickListener(v -> {
+            ProductoRepository.obtenerProductosDemo(); // inserta en Firebase
+            Toast.makeText(this, "Productos demo insertados en Firebase", Toast.LENGTH_SHORT).show();
+
+            // refrescamos la vista
+            cargarDatosIniciales(userId);
+        });
 
         // Botón flotante para abrir el carrito
         fabCarrito.setOnClickListener(v -> {

@@ -1,5 +1,7 @@
 package com.example.eternal_games;
 
+import android.util.Log;
+
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.AuthResult;
@@ -134,5 +136,30 @@ public class FirebaseRepository {
                 .get()
                 .addOnSuccessListener(success)
                 .addOnFailureListener(failure);
+    }
+    ///para producto demo (insert de producto en fiberbase)
+    public void insertarProducto(Producto producto,
+                                 OnSuccessListener<Void> success,
+                                 OnFailureListener failure) {
+        Log.d("Firebase", "PASO PRO EL INSERT");
+        /// Mapeamos el objeto con lo que tenemos en la bd ya como lo definimos en REACT
+        ///manejamos la imgurl en vez de psarle img
+        Map<String, Object> data = new HashMap<>();
+        data.put("title", producto.title);
+        data.put("description", producto.description);
+        data.put("price", producto.price);
+        data.put("status", producto.status);
+        data.put("platform", producto.platform);
+        data.put("topSell", producto.topSell);
+        data.put("genre", producto.genre);
+        data.put("category", producto.category);
+        data.put("img", producto.imgUrl);
+
+        db.collection("productos")
+                .document()
+                .set(data)
+                .addOnSuccessListener(success)
+                .addOnFailureListener(failure);
+
     }
 }

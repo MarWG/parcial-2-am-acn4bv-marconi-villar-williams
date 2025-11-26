@@ -11,9 +11,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
-
 import com.squareup.picasso.Picasso;
-
 import java.util.List;
 
 public class ProductoAdapter extends RecyclerView.Adapter<ProductoAdapter.ProductoViewHolder> {
@@ -24,7 +22,6 @@ public class ProductoAdapter extends RecyclerView.Adapter<ProductoAdapter.Produc
     private List<CarritoItem> carrito;
     private FirebaseRepository firebaseRepository;
     private String userId;
-
 
     public ProductoAdapter(Context context,
                            List<Producto> productos,
