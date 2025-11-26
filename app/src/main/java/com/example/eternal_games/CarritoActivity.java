@@ -2,6 +2,8 @@ package com.example.eternal_games;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
+import android.view.View;
 import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Button;
@@ -37,6 +39,7 @@ public class CarritoActivity extends AppCompatActivity {
         // Configurar RecyclerView
         recyclerCarrito = findViewById(R.id.recyclerCarrito);
         CarritoAdapter adapter = new CarritoAdapter(this, carrito);
+
         adapter.setCallback(new CarritoCallback() {
             @Override
             public void onCarritoActualizado(List<CarritoItem> nuevoCarrito) {
@@ -84,8 +87,45 @@ public class CarritoActivity extends AppCompatActivity {
         });
 
         // Simulacion de boton finalizar compra
+//        btnFinalizarCompra.setOnClickListener(v -> {
+//            Toast.makeText(this, "Compra finalizada. ¡Gracias!", Toast.LENGTH_LONG).show();
+        //});
         btnFinalizarCompra.setOnClickListener(v -> {
-            Toast.makeText(this, "Compra finalizada. ¡Gracias!", Toast.LENGTH_LONG).show();
+            if (carrito.isEmpty()) {
+                Toast.makeText(this, "El carrito está vacío", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            int total = 0;
+            int cantidad = 0;
+
+            FirebaseRepository repo = new FirebaseRepository();
+            String userId = repo.obtenerUserId();
+
+            // Eliminar cada item del carrito en Firebase
+            for (CarritoItem item : carrito) {
+                total += item.getTotal();
+                cantidad += item.cantidad;
+
+                repo.eliminarDelCarrito(userId, item.producto.id,
+                        aVoid -> Log.d("Compra", "Item eliminado de Firebase"),
+                        e -> Log.e("Compra", "Error al eliminar item", e));
+            }
+
+            // Vaciar lista local y actualizar UI
+            carrito.clear();
+            adapter.notifyDataSetChanged();
+            actualizarResumen();
+
+            // Mostrar diálogo de confirmación
+            CompraFinalizada dialog = new CompraFinalizada(total, cantidad);
+            dialog.show(getSupportFragmentManager(), "CompraFinalizada");
+
+            // Devolver carrito vacío y cantidad al MainActivity
+            Intent resultIntent = new Intent();
+            resultIntent.putExtra("carritoActualizado", carrito);
+            resultIntent.putExtra("cantidadTotal", cantidad);
+            setResult(RESULT_OK, resultIntent);
         });
     }
 

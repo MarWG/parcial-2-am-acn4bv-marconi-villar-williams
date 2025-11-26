@@ -7,6 +7,12 @@
     <string name="login_google">Iniciar sesion con Google</string>
     <string name="registro_google">Continuar con Google</string>
     <string name="registor">¿No tenés cuenta? Registrate aquí</string>
+
     <string name="default_web_client_id">407536959592-63ju33od8h7l7mh7l4cbc7rpju58fvsm.apps.googleusercontent.com</string>
+
+    <!--vista finalizar compra-->
+    <string name="titulo_fin_compra">✅ ¡Compra finalizada con exito!</string>
+    <string name="sub_titulo_fin_compra">Gracias por tu compra.</string>
+    <string name="button">Seguir comprando</string>
 
 </resources>
