@@ -1,4 +1,4 @@
-package com.example.eternal_games;
+package com.example.eternal_games.adapter;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -10,6 +10,9 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.eternal_games.CarritoCallback;
+import com.example.eternal_games.R;
+import com.example.eternal_games.model.CarritoItem;
 import com.squareup.picasso.Picasso;
 
 import java.util.List;

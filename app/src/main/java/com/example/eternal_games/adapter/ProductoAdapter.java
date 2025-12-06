@@ -1,4 +1,4 @@
-package com.example.eternal_games;
+package com.example.eternal_games.adapter;
 
 import android.content.Context;
 import android.util.Log;
@@ -11,6 +11,11 @@ import android.widget.TextView;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.example.eternal_games.repository.FirebaseRepository;
+import com.example.eternal_games.R;
+import com.example.eternal_games.model.CarritoItem;
+import com.example.eternal_games.model.Producto;
 import com.squareup.picasso.Picasso;
 import java.util.List;
 
@@ -119,5 +124,15 @@ public class ProductoAdapter extends RecyclerView.Adapter<ProductoAdapter.Produc
             txtPrecio = itemView.findViewById(R.id.txtPrecio);
             btnAgregar = itemView.findViewById(R.id.btnAgregar);
         }
+    }
+
+    public void setProductos(List<Producto> productos) {
+        this.productos = productos;       // actualiza la lista interna
+        notifyDataSetChanged();           // refresca el RecyclerView
+    }
+
+    public void setCarrito(List<CarritoItem> carritoItems) {
+        this.carrito = carritoItems;
+        notifyDataSetChanged();
     }
 }

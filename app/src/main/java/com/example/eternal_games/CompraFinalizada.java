@@ -12,6 +12,8 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.DialogFragment;
 
+import com.example.eternal_games.ui.MainActivity;
+
 public class CompraFinalizada extends DialogFragment {
     private int total;
     private int cantidad;
