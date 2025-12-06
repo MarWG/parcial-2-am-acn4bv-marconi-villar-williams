@@ -1,4 +1,4 @@
-package com.example.eternal_games;
+package com.example.eternal_games.model;
 
 import java.io.Serializable;
 

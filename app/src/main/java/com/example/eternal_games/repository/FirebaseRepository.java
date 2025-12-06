@@ -1,7 +1,9 @@
-package com.example.eternal_games;
+package com.example.eternal_games.repository;
 
 import android.util.Log;
 
+import com.example.eternal_games.model.CarritoItem;
+import com.example.eternal_games.model.Producto;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.AuthResult;

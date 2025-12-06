@@ -1,4 +1,4 @@
-package com.example.eternal_games;
+package com.example.eternal_games.repository;
 
 import android.content.Context;
 import android.util.Log;
@@ -8,11 +8,11 @@ import org.json.JSONObject;
 
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.function.Consumer;
 //import de firebase
-import com.google.firebase.firestore.FirebaseFirestore;
+import com.example.eternal_games.R;
+import com.example.eternal_games.model.Producto;
 import com.google.firebase.firestore.DocumentSnapshot;
 
 public class ProductoRepository {

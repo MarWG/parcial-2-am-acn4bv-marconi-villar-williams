@@ -1,55 +1,51 @@
-package com.example.eternal_games;
+package com.example.eternal_games.ui;
 
 import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 
+import com.example.eternal_games.repository.FirebaseRepository;
+import com.example.eternal_games.GoogleSignInManager;
+import com.example.eternal_games.R;
 import com.google.android.gms.auth.api.signin.*;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 
-public class LoginActivity extends AppCompatActivity {
+public class RegistroActivity extends AppCompatActivity {
+
+    private EditText etEmail, etPassword;
+    private Button btnRegister;
+    private TextView headerError;
 
     private FirebaseRepository repo;
-    private GoogleSignInClient googleSignInClient;
+    private GoogleSignInClient googleClient;
     private ActivityResultLauncher<Intent> signInLauncher;
-
-    private EditText etUsuario, etContrasena;
-    private TextView headerError;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_login);
+        setContentView(R.layout.activity_register);
 
         repo = new FirebaseRepository();
+        googleClient = GoogleSignInManager.configurarGoogle(this);
 
-        etUsuario = findViewById(R.id.etUsuario);
-        etContrasena = findViewById(R.id.etContrasena);
+        etEmail = findViewById(R.id.etEmail);
+        etPassword = findViewById(R.id.etPassword);
+        btnRegister = findViewById(R.id.btnRegister);
         headerError = findViewById(R.id.headerError);
 
-        Button btnLogin = findViewById(R.id.btnLogin);
+        btnRegister.setOnClickListener(v -> registrarUsuario());
 
-        // Redirige a registro
-        TextView linkRegistro = findViewById(R.id.linkRegistro);
-        linkRegistro.setOnClickListener(v -> {
-            startActivity(new Intent(this, RegistroActivity.class));
-        });
-
-        // Login con email/contraseña
-        btnLogin.setOnClickListener(v -> login());
-
-        // Configuración Google Sign-In
-        googleSignInClient = GoogleSignInManager.configurarGoogle(this);
-
+        // Google Sign-In
         signInLauncher = registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),
                 result -> {
@@ -73,21 +69,31 @@ public class LoginActivity extends AppCompatActivity {
         );
 
         findViewById(R.id.btnLoginGoogle).setOnClickListener(v -> {
-            Intent signInIntent = googleSignInClient.getSignInIntent();
+            Intent signInIntent = googleClient.getSignInIntent();
             signInLauncher.launch(signInIntent);
         });
     }
 
-    private void login() {
-        String email = etUsuario.getText().toString().trim();
-        String password = etContrasena.getText().toString().trim();
+    //Registramos Usuarios con validacionees basicas
+    private void registrarUsuario() {
+        String email = etEmail.getText().toString().trim();
+        String password = etPassword.getText().toString().trim();
 
         if (email.isEmpty() || password.isEmpty()) {
             mostrarError("Completa todos los campos");
             return;
         }
-        repo.login(email, password,
-                user -> navegarAMain(),
+
+        if (password.length() < 6) {
+            mostrarError("La contraseña debe tener al menos 6 caracteres");
+            return;
+        }
+
+        repo.registrarUsuario(email, password,
+                authResult -> {
+                    Toast.makeText(this, "Usuario registrado correctamente", Toast.LENGTH_SHORT).show();
+                    navegarAMain();
+                },
                 error -> mostrarError("Error: " + error.getMessage())
         );
     }

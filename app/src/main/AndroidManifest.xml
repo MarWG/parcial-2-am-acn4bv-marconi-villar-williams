@@ -13,7 +13,7 @@
         android:theme="@style/Theme.Eternal_Games">
 
         <activity
-            android:name=".MainActivity"
+            android:name=".ui.MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -22,12 +22,12 @@
         </activity>
 
         <!-- Activitys -->
-        <activity android:name=".CarritoActivity" />
-        <activity android:name=".RegistroActivity" />
+        <activity android:name=".ui.CarritoActivity" />
+        <activity android:name=".ui.RegistroActivity" />
 
         <!-- Activity de login -->
         <activity
-            android:name=".LoginActivity"
+            android:name=".ui.LoginActivity"
             android:exported="true" />
     </application>
 

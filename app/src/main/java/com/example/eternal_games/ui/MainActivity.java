@@ -1,8 +1,7 @@
-package com.example.eternal_games;
+package com.example.eternal_games.ui;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
@@ -11,9 +10,21 @@ import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.PopupMenu;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.example.eternal_games.repository.FirebaseRepository;
+import com.example.eternal_games.adapter.ProductoAdapter;
+import com.example.eternal_games.repository.ProductoRepository;
+import com.example.eternal_games.R;
+import com.example.eternal_games.model.CarritoItem;
+import com.example.eternal_games.model.Producto;
+import com.example.eternal_games.viewmodel.ProductoViewModel;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreSettings;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -32,63 +43,85 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        // Si no hay usuario logueado, redirigimos al login
+
+        // Configuración global de Firestore esto por si sigue trayendo cacheluego lo borramos
+        FirebaseFirestoreSettings settings = new FirebaseFirestoreSettings.Builder()
+                .setPersistenceEnabled(false) // desactiva cache local
+                .build();
+
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        db.setFirestoreSettings(settings);
+
+        // Si no hay usuario logueado, redirigimos al login (hay que moverlo para respetar arquitectura nueva)
         repo = new FirebaseRepository(); //intanciamso fiberbase repo para manejo de bd
         if (!repo.estaLogueado()) {
             startActivity(new Intent(this, LoginActivity.class));
             finish();
             return;
         }
+        repo = new FirebaseRepository();
         setContentView(R.layout.activity_main);
-
         recyclerProductos = findViewById(R.id.recyclerProductos);
         btnDemo = findViewById(R.id.btnDemo);
         badgeCantidad = findViewById(R.id.badgeCantidad);
         fabCarrito = findViewById(R.id.fabCarrito);
         btnDemo = findViewById(R.id.btnDemo);
 
-        /// cerrar sesion
+        /// cerrar sesion (hay que mover esto para respetar arquitectura nueva)
         ImageButton btnCerrarSesion = findViewById(R.id.btnCerrarSesion);
         MenuCerrarSesion(btnCerrarSesion);
 
-        // Cargar productos desde el repositorio
-        //productos.addAll(ProductoRepository.cargarProductos(this));
+        //// Refactor para arquitectura (MVVM + Repository + Adapter) ////
+        // Iniciamos viewModel
+        ProductoViewModel viewModel = new ViewModelProvider(this).get(ProductoViewModel.class);
+        // Iniciamos Adapter
+        adapter = new ProductoAdapter(this, new ArrayList<>(), badgeCantidad, new ArrayList<>(),
+                producto -> viewModel.agregarAlCarrito(producto)
+        );
+        recyclerProductos.setLayoutManager(new GridLayoutManager(this, 2));
+        recyclerProductos.setAdapter(adapter);
 
-        // Configurar RecyclerView con adapter que actualiza el badge y el carrito
-        //adapter = new ProductoAdapter(this, productos, badgeCantidad, carrito);
-        //recyclerProductos.setLayoutManager(new GridLayoutManager(this, 2));
-        //recyclerProductos.setAdapter(adapter);
+        // Observamos productos
+        viewModel.getProductos().observe(this, productos -> {
+            adapter.setProductos(productos); // actualiza lista en el adapter
+        });
+        // Observamos carrito
+        viewModel.getCarrito().observe(this, carritoItems -> {
+            adapter.setCarrito(carritoItems);
+            actualizarBadge(calcularCantidadTotal(carritoItems));
+        });
+        // Observamos Toast
+        viewModel.getMensajeToast().observe(this, mensaje -> {
+            Toast.makeText(this, mensaje, Toast.LENGTH_SHORT).show();
+        });
+        // Cargar datos iniciales
+        viewModel.cargarDatosIniciales();
+        ///////////////////FIN DE REFACTOR//////////////////////////////////////
 
-        //Se cambio el metodo ahora cargar productos desde el Firebase con su carrito
-        String userId = repo.obtenerUserId();
-        cargarDatosIniciales(userId);
-
+        ///ESTO HAY QUE REFACTORIZAR TAMBIEN///
         // Botón para agregar productos demo hacia Firebase
         btnDemo.setOnClickListener(v -> {
             ProductoRepository.obtenerProductosDemo(); // inserta en Firebase
             Toast.makeText(this, "Productos demo insertados en Firebase", Toast.LENGTH_SHORT).show();
-
             // refrescamos la vista
-            cargarDatosIniciales(userId);
+            //cargarDatosIniciales(userId);
+            viewModel.cargarDatosIniciales();
         });
 
+        // Refactor para arquitectura (MVVM + Repository + Adapter) //
         // Botón flotante para abrir el carrito
+        // preguntamso directo al livedata
         fabCarrito.setOnClickListener(v -> {
-            if (carrito.isEmpty()) {
+            List<CarritoItem> carritoActual = viewModel.getCarrito().getValue();
+            if (carritoActual == null || carritoActual.isEmpty()) {
                 Toast.makeText(this, "El carrito está vacío.", Toast.LENGTH_SHORT).show();
                 return;
             }
-            //Intent intent = new Intent(this, CarritoActivity.class);
-            //intent.putExtra("carrito", new ArrayList<>(carrito)); // Serializable
-            //startActivity(intent);
-            //CAMBIAMOS STARACTIVITY POR STARACTIVITYRESULT PARA VER RESULTADO ELEGUIMSO 1001
             Intent intent = new Intent(this, CarritoActivity.class);
-            intent.putExtra("carrito", new ArrayList<>(carrito)); // Serializable
+            intent.putExtra("carrito", new ArrayList<>(carritoActual));
             startActivityForResult(intent, 1001);
         });
-
-        // Inicializar badge en 0 (oculto)
-        actualizarBadge(0);
+        ///////////FIN DE REFACTOR///////////////////////////////
     }
 
     public void actualizarBadge(int cantidad) {
@@ -133,8 +166,6 @@ public class MainActivity extends AppCompatActivity {
     /// delegamos la logica aca luego vemso que hacemos
     private void mostrarMenuCerrarSesion(View anchor) {
         PopupMenu popup = new PopupMenu(this, anchor);
-
-        /// mostramos ifno del usuario por el momento solo mail
         MenuItem infoMail = popup.getMenu().add(repo.obtenerMailActual());
         infoMail.setEnabled(false); // lo muestra en gris, sin acción
         popup.getMenu().add("Cerrar sesión");
@@ -160,37 +191,4 @@ public class MainActivity extends AppCompatActivity {
         finish();
     }
 
-    private void cargarDatosIniciales(String userId) {
-        ProductoRepository.cargarDesdeFirebase(this, productos -> {
-            this.productos.clear();
-            this.productos.addAll(productos);
-
-            repo.obtenerCarritoUsuario(userId,
-                    carritoItems -> {
-                        carrito.clear();
-                        List<CarritoItem> carritoConDetalles = new ArrayList<>();
-
-                        for (CarritoItem item : carritoItems) {
-                            for (Producto p : productos) {
-                                if (p.id.equals(item.producto.id)) {
-                                    carritoConDetalles.add(new CarritoItem(p, item.cantidad));
-                                    break;
-                                }
-                            }
-                        }
-
-                        carrito.addAll(carritoConDetalles);
-                        actualizarBadge(calcularCantidadTotal(carrito));
-
-                        adapter = new ProductoAdapter(this, productos, badgeCantidad, carrito, repo, userId);
-                        recyclerProductos.setLayoutManager(new GridLayoutManager(this, 2));
-                        recyclerProductos.setAdapter(adapter);
-                    },
-                    e -> {
-                        Log.e("Carrito", "Error al cargar carrito", e);
-                        Toast.makeText(this, "Error al cargar el carrito", Toast.LENGTH_SHORT).show();
-                    }
-            );
-        });
-    }
 }
