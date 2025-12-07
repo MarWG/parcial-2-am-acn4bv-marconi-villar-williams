@@ -16,11 +16,11 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.eternal_games.repository.FirebaseRepository;
 import com.example.eternal_games.adapter.ProductoAdapter;
-import com.example.eternal_games.repository.ProductoRepository;
 import com.example.eternal_games.R;
 import com.example.eternal_games.model.CarritoItem;
 import com.example.eternal_games.model.Producto;
 import com.example.eternal_games.viewmodel.ProductoViewModel;
+import com.example.eternal_games.viewmodel.SesionViewModel;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreSettings;
@@ -39,6 +39,8 @@ public class MainActivity extends AppCompatActivity {
     private List<CarritoItem> carrito = new ArrayList<>();
     private ProductoAdapter adapter;
     private FirebaseRepository repo;
+    private SesionViewModel sesionViewModel;
+    private ProductoViewModel viewModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,14 +54,8 @@ public class MainActivity extends AppCompatActivity {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         db.setFirestoreSettings(settings);
 
-        // Si no hay usuario logueado, redirigimos al login (hay que moverlo para respetar arquitectura nueva)
-        repo = new FirebaseRepository(); //intanciamso fiberbase repo para manejo de bd
-        if (!repo.estaLogueado()) {
-            startActivity(new Intent(this, LoginActivity.class));
-            finish();
-            return;
-        }
-        repo = new FirebaseRepository();
+
+        //repo = new FirebaseRepository();
         setContentView(R.layout.activity_main);
         recyclerProductos = findViewById(R.id.recyclerProductos);
         btnDemo = findViewById(R.id.btnDemo);
@@ -71,42 +67,44 @@ public class MainActivity extends AppCompatActivity {
         ImageButton btnCerrarSesion = findViewById(R.id.btnCerrarSesion);
         MenuCerrarSesion(btnCerrarSesion);
 
-        //// Refactor para arquitectura (MVVM + Repository + Adapter) ////
-        // Iniciamos viewModel
-        ProductoViewModel viewModel = new ViewModelProvider(this).get(ProductoViewModel.class);
-        // Iniciamos Adapter
-        adapter = new ProductoAdapter(this, new ArrayList<>(), badgeCantidad, new ArrayList<>(),
-                producto -> viewModel.agregarAlCarrito(producto)
-        );
-        recyclerProductos.setLayoutManager(new GridLayoutManager(this, 2));
-        recyclerProductos.setAdapter(adapter);
+        sesionViewModel = new ViewModelProvider(this).get(SesionViewModel.class);
 
-        // Observamos productos
-        viewModel.getProductos().observe(this, productos -> {
-            adapter.setProductos(productos); // actualiza lista en el adapter
-        });
-        // Observamos carrito
-        viewModel.getCarrito().observe(this, carritoItems -> {
-            adapter.setCarrito(carritoItems);
-            actualizarBadge(calcularCantidadTotal(carritoItems));
-        });
-        // Observamos Toast
-        viewModel.getMensajeToast().observe(this, mensaje -> {
-            Toast.makeText(this, mensaje, Toast.LENGTH_SHORT).show();
-        });
-        // Cargar datos iniciales
-        viewModel.cargarDatosIniciales();
-        ///////////////////FIN DE REFACTOR//////////////////////////////////////
+        // Observamos si el usuario está logueado
+        sesionViewModel.getUsuarioLogueado().observe(this, logueado -> {
+            if (Boolean.FALSE.equals(logueado)) {
+                navegarAlLogin();
+            } else if (Boolean.TRUE.equals(logueado)) {
+                //inicializamos ProductoViewModel
+                viewModel = new ViewModelProvider(this).get(ProductoViewModel.class);
 
-        ///ESTO HAY QUE REFACTORIZAR TAMBIEN///
-        // Botón para agregar productos demo hacia Firebase
-        btnDemo.setOnClickListener(v -> {
-            ProductoRepository.obtenerProductosDemo(); // inserta en Firebase
-            Toast.makeText(this, "Productos demo insertados en Firebase", Toast.LENGTH_SHORT).show();
-            // refrescamos la vista
-            //cargarDatosIniciales(userId);
-            viewModel.cargarDatosIniciales();
+                adapter = new ProductoAdapter(this, new ArrayList<>(), badgeCantidad, new ArrayList<>(),
+                        producto -> viewModel.agregarAlCarrito(producto)
+                );
+                recyclerProductos.setLayoutManager(new GridLayoutManager(this, 2));
+                recyclerProductos.setAdapter(adapter);
+
+                viewModel.getProductos().observe(this, productos -> adapter.setProductos(productos));
+                viewModel.getCarrito().observe(this, carritoItems -> {
+                    adapter.setCarrito(carritoItems);
+                    actualizarBadge(calcularCantidadTotal(carritoItems));
+                });
+                viewModel.getMensajeToast().observe(this, mensaje ->
+                        Toast.makeText(this, mensaje, Toast.LENGTH_SHORT).show()
+                );
+
+                viewModel.cargarDatosIniciales(); //con sesión válida
+            }
         });
+
+        // Observamos si se cerró la sesión
+        sesionViewModel.getSesionCerrada().observe(this, cerrada -> {
+            if (Boolean.TRUE.equals(cerrada)) {
+                navegarAlLogin();
+            }
+        });
+
+        //Disparamos la verificación de sesión
+        sesionViewModel.verificarSesion();
 
         // Refactor para arquitectura (MVVM + Repository + Adapter) //
         // Botón flotante para abrir el carrito
@@ -166,13 +164,19 @@ public class MainActivity extends AppCompatActivity {
     /// delegamos la logica aca luego vemso que hacemos
     private void mostrarMenuCerrarSesion(View anchor) {
         PopupMenu popup = new PopupMenu(this, anchor);
-        MenuItem infoMail = popup.getMenu().add(repo.obtenerMailActual());
-        infoMail.setEnabled(false); // lo muestra en gris, sin acción
+
+        // mail desde el ViewModel
+        String mail = sesionViewModel.getUsuarioMail().getValue();
+        if (mail != null) {
+            MenuItem infoMail = popup.getMenu().add(mail);
+            infoMail.setEnabled(false);
+        }
+
         popup.getMenu().add("Cerrar sesión");
 
         popup.setOnMenuItemClickListener(item -> {
             if ("Cerrar sesión".equals(item.getTitle())) {
-                cerrarSesion();
+                sesionViewModel.cerrarSesion(); // delegamos al ViewModel
                 return true;
             }
             return false;
@@ -181,10 +185,10 @@ public class MainActivity extends AppCompatActivity {
         popup.show();
     }
 
-    private void cerrarSesion() {
+    /*private void cerrarSesion() {
         repo.cerrarSesion();
         navegarAlLogin();
-    }
+    }*/
 
     private void navegarAlLogin() {
         startActivity(new Intent(this, LoginActivity.class));
