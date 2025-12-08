@@ -56,12 +56,42 @@ public class FirebaseRepository {
 
     //Registrar Usuarioen forma tradicional
     public void registrarUsuario(String email, String password,
-                                 OnSuccessListener<AuthResult> success,
+                                 OnSuccessListener<FirebaseUser> success,
                                  OnFailureListener failure) {
         auth.createUserWithEmailAndPassword(email, password)
+                .addOnSuccessListener(authResult -> {
+                    FirebaseUser user = authResult.getUser();
+                    if (user == null) {
+                        failure.onFailure(new Exception("El registro falló"));
+                        return;
+                    }
+                    crearDocumentoUsuario(user,
+                            aVoid -> success.onSuccess(user),
+                            failure
+                    );
+                })
+                .addOnFailureListener(failure);
+    }
+
+
+    //Registrar Usuarioen en una tabla para manejar roles en react o futuros campos dentro dle perfil
+    public void crearDocumentoUsuario(FirebaseUser user,
+                                      OnSuccessListener<Void> success,
+                                      OnFailureListener failure) {
+        Map<String, Object> datosUsuario = new HashMap<>();
+        datosUsuario.put("email", user.getEmail());
+        datosUsuario.put("rol", "cliente");
+        datosUsuario.put("createdAt", FieldValue.serverTimestamp());
+        datosUsuario.put("updatedAt", FieldValue.serverTimestamp());
+
+        FirebaseFirestore.getInstance()
+                .collection("users")
+                .document(user.getUid())
+                .set(datosUsuario)
                 .addOnSuccessListener(success)
                 .addOnFailureListener(failure);
     }
+
     // agregar producto carrito
     public void agregarAlCarrito(String userId, String idProducto, int cantidad,
                                  OnSuccessListener<Void> success,

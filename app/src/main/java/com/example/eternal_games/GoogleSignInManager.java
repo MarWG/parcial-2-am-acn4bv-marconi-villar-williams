@@ -3,6 +3,8 @@ package com.example.eternal_games;
 import android.app.Activity;
 import android.widget.Toast;
 import android.content.Context;
+
+import com.example.eternal_games.repository.FirebaseRepository;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
@@ -27,8 +29,19 @@ public class GoogleSignInManager {
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
                         FirebaseUser user = firebaseAuth.getCurrentUser();
-                        Toast.makeText(context, "Bienvenido " + (user != null ? user.getEmail() : ""), Toast.LENGTH_SHORT).show();
-                        onSuccess.run();
+                        if (user != null) {
+                            // Sincronizar con Firestore
+                            FirebaseRepository repo = new FirebaseRepository();
+                            repo.crearDocumentoUsuario(user,
+                                    aVoid -> {
+                                        Toast.makeText(context, "Bienvenido " + user.getEmail(), Toast.LENGTH_SHORT).show();
+                                        onSuccess.run();
+                                    },
+                                    error -> Toast.makeText(context, "Error Firestore: " + error.getMessage(), Toast.LENGTH_SHORT).show()
+                            );
+                        } else {
+                            Toast.makeText(context, "Error: usuario nulo", Toast.LENGTH_SHORT).show();
+                        }
                     } else {
                         Toast.makeText(context, "Error en autenticación", Toast.LENGTH_SHORT).show();
                     }
