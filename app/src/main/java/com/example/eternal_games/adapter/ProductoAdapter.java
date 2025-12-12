@@ -1,6 +1,7 @@
 package com.example.eternal_games.adapter;
 
 import android.content.Context;
+import android.content.Intent;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -16,6 +17,7 @@ import com.example.eternal_games.repository.FirebaseRepository;
 import com.example.eternal_games.R;
 import com.example.eternal_games.model.CarritoItem;
 import com.example.eternal_games.model.Producto;
+import com.example.eternal_games.ui.DetalleProductoActivity;
 import com.squareup.picasso.Picasso;
 import java.util.List;
 public class ProductoAdapter extends RecyclerView.Adapter<ProductoAdapter.ProductoViewHolder> {
@@ -71,6 +73,12 @@ public class ProductoAdapter extends RecyclerView.Adapter<ProductoAdapter.Produc
                 listener.onAgregarClick(p); // notifica al ViewModel
             }
             Toast.makeText(context, p.title + " agregado al carrito", Toast.LENGTH_SHORT).show();
+        });
+
+        holder.itemView.setOnClickListener(v -> {
+            Intent intent = new Intent(context, DetalleProductoActivity.class);
+            intent.putExtra("producto", p);
+            context.startActivity(intent);
         });
     }
 

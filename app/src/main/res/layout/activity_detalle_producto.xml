@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/fondo"
+    tools:context=".ui.MainActivity">
+
+    <!-- Nav Bar Superior -->
+    <include
+        android:id="@+id/navbar_superior"
+        layout="@layout/navbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <!-- Nav Bar Inferior rojo -->
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/navbar_inferior"
+        android:layout_width="0dp"
+        android:layout_height="40dp"
+        android:background="@color/red"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        app:layout_constraintTop_toBottomOf="@id/navbar_superior"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" >
+
+        <!-- Botón Inicio (solo ícono) -->
+        <ImageButton
+            android:id="@+id/btnInicio"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="@android:color/transparent"
+            android:src="@drawable/ic_home"
+            android:contentDescription="Inicio"
+            app:layout_constraintEnd_toStartOf="@id/btnContacto"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent" />
+
+        <!-- Botón Contacto (solo ícono) -->
+        <ImageButton
+            android:id="@+id/btnContacto"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="@android:color/transparent"
+            android:src="@drawable/ic_contacto"
+            android:contentDescription="Contacto"
+            app:layout_constraintEnd_toStartOf="@id/btnCerrarSesion"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent" />
+
+        <!-- Botón cerrar sesion -->
+        <ImageButton
+            android:id="@+id/btnCerrarSesion"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="@android:color/transparent"
+            android:src="@drawable/ic_usuario"
+            android:contentDescription="Registro"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <!-- Contenedor producto detalle -->
+    <LinearLayout
+        android:id="@+id/contenedorProducto"
+        android:layout_width="350dp"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="@drawable/contenedor_blanco"
+        android:padding="24dp"
+        android:layout_marginTop="24dp"
+        android:elevation="4dp"
+        app:layout_constraintTop_toBottomOf="@id/navbar_inferior"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <!-- Imagen grande del producto -->
+        <ImageView
+            android:id="@+id/imgDetalleProducto"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:adjustViewBounds="true"
+            android:scaleType="fitCenter"
+            android:contentDescription="imagen"
+            android:layout_marginBottom="16dp"/>
+
+        <!-- Título -->
+        <TextView
+            android:id="@+id/tvDetalleTitulo"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Título del producto"
+            android:textStyle="bold"
+            android:textSize="20sp"
+            android:textColor="@color/colorTextoPrincipal"
+            android:padding="8dp"/>
+
+        <!-- Descripción -->
+        <TextView
+            android:id="@+id/tvDetalleDescripcion"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Descripción completa del producto"
+            android:textSize="16sp"
+            android:textColor="@color/colorTextoSecundario"
+            android:padding="8dp"/>
+
+        <!-- Precio -->
+        <TextView
+            android:id="@+id/tvDetallePrecio"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="$0.00"
+            android:textStyle="bold"
+            android:textSize="18sp"
+            android:textColor="@color/colorTextoPrincipal"
+            android:padding="8dp"/>
+
+        <!-- Botón Agregar al carrito -->
+        <Button
+            android:id="@+id/btnDetalleAgregar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/agregar_al_carrito"
+            android:textColor="@color/white"
+            android:backgroundTint="@color/ButtonAccionAzul"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp"
+            android:layout_gravity="center_horizontal"/>
+    </LinearLayout>
+
+    <!-- FAB del carrito -->
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fabCarrito"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/ic_cart"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginBottom="24dp"
+        android:layout_marginEnd="24dp"
+        app:backgroundTint="@color/purple_500"
+        app:tint="@android:color/white"/>
+
+    <!-- Badge flotante sobre el FAB -->
+    <TextView
+        android:id="@+id/badgeCantidad"
+        android:layout_width="20dp"
+        android:layout_height="20dp"
+        android:background="@drawable/badge_redondo"
+        android:text="0"
+        android:textColor="@android:color/white"
+        android:textSize="12sp"
+        android:gravity="center"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="@id/fabCarrito"
+        app:layout_constraintTop_toTopOf="@id/fabCarrito"
+        android:layout_marginEnd="2dp"
+        android:layout_marginTop="2dp"
+        android:elevation="8dp"/>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
