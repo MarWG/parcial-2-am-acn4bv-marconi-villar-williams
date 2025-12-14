@@ -25,6 +25,7 @@
         <activity android:name=".ui.CarritoActivity" />
         <activity android:name=".ui.RegistroActivity" />
         <activity android:name=".ui.DetalleProductoActivity" />
+        <activity android:name=".ui.CompraActivity" />
 
         <!-- Activity de login -->
         <activity

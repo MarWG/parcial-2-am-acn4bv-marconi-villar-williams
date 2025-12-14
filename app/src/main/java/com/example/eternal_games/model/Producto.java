@@ -20,4 +20,6 @@ public class Producto implements Serializable {
     @Exclude
     // Imagen web (URL)
     public String imgUrl;
+    public Integer cantidad; //solo usado en compras por el momento
+
 }

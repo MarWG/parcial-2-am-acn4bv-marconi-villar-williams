@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel;
 
 import com.example.eternal_games.model.CarritoItem;
 import com.example.eternal_games.repository.CartRepository;
+import com.example.eternal_games.repository.CompraRepository;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,6 +14,8 @@ import java.util.List;
 public class CarritoViewModel extends ViewModel {
 
     private final CartRepository cartRepo = CartRepository.getInstance();
+
+    private final CompraViewModel compraViewModel;
 
     // Carrito compartido (mismo para todas las pantallas)
     private final LiveData<List<CarritoItem>> carrito = cartRepo.getCarrito();
@@ -22,6 +25,7 @@ public class CarritoViewModel extends ViewModel {
     private final MediatorLiveData<Double> totalGeneral = new MediatorLiveData<>();
 
     public CarritoViewModel() {
+        this.compraViewModel = new CompraViewModel(); //traemos el viwmodel de compra
         // cada vez que cambia el carrito, recalculamos
         cantidadTotal.addSource(carrito, items -> cantidadTotal.setValue(calcularCantidad(items)));
         totalGeneral.addSource(carrito, items -> totalGeneral.setValue(calcularTotal(items)));
@@ -51,10 +55,9 @@ public class CarritoViewModel extends ViewModel {
 
     // Finalizar compra: borrar todos (Firebase) y vaciar memoria
     public void finalizarCompra() {
-        cartRepo.registrarCompra();
         List<CarritoItem> items = carrito.getValue();
         if (items == null || items.isEmpty()) return;
-
+        compraViewModel.registrarCompra(items);
         for (CarritoItem item : new ArrayList<>(items)) {
             cartRepo.eliminar(item);
         }
@@ -81,4 +84,3 @@ public class CarritoViewModel extends ViewModel {
         return total;
     }
 }
-

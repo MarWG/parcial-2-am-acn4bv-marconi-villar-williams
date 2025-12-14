@@ -3,6 +3,7 @@ package com.example.eternal_games.repository;
 import android.util.Log;
 
 import com.example.eternal_games.model.CarritoItem;
+import com.example.eternal_games.model.Compra;
 import com.example.eternal_games.model.Producto;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -13,10 +14,12 @@ import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.firestore.SetOptions;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -210,6 +213,28 @@ public class FirebaseRepository {
                 .add(compra)
                 .addOnSuccessListener(docRef -> {
                     if (success != null) success.onSuccess(null);
+                })
+                .addOnFailureListener(failure);
+    }
+
+    public void obtenerComprasUsuario(String userId,
+                                      OnSuccessListener<List<Compra>> success,
+                                      OnFailureListener failure) {
+        db.collection("users")
+                .document(userId)
+                .collection("compras")
+                .orderBy("fecha", Query.Direction.DESCENDING)
+                .get()
+                .addOnSuccessListener(querySnapshot -> {
+                    List<Compra> compras = new ArrayList<>();
+                    for (DocumentSnapshot doc : querySnapshot) {
+                        Compra compra = doc.toObject(Compra.class);
+                        if (compra != null) {
+                            compra.id = doc.getId(); // guardamos el id del documento
+                            compras.add(compra);
+                        }
+                    }
+                    success.onSuccess(compras);
                 })
                 .addOnFailureListener(failure);
     }

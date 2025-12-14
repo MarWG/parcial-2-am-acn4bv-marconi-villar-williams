@@ -47,6 +47,14 @@ public class MainActivity extends AppCompatActivity {
         ImageButton btnCerrarSesion = findViewById(R.id.btnCerrarSesion);
         MenuCerrarSesion(btnCerrarSesion);
 
+        ImageButton btnContacto = findViewById(R.id.btnContacto);
+
+        btnContacto.setOnClickListener(v -> {
+            Intent intent = new Intent(MainActivity.this, CompraActivity.class);
+            startActivity(intent);
+        });
+
+
         sesionViewModel = new ViewModelProvider(this).get(SesionViewModel.class);
 
         sesionViewModel.getUsuarioLogueado().observe(this, logueado -> {
