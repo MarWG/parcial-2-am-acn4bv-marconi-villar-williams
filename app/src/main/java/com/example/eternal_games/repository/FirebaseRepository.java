@@ -194,4 +194,23 @@ public class FirebaseRepository {
                 .addOnFailureListener(failure);
 
     }
+    public void insertarCompra(Map<String, Object> compra,
+                               OnSuccessListener<Void> success,
+                               OnFailureListener failure) {
+        String uid = obtenerUserId();
+        if (uid == null) {
+            if (failure != null) failure.onFailure(new Exception("Usuario no logueado"));
+            return;
+        }
+
+        FirebaseFirestore.getInstance()
+                .collection("users")
+                .document(uid)
+                .collection("compras")
+                .add(compra)
+                .addOnSuccessListener(docRef -> {
+                    if (success != null) success.onSuccess(null);
+                })
+                .addOnFailureListener(failure);
+    }
 }

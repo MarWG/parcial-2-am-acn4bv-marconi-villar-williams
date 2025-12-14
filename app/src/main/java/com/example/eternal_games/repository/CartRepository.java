@@ -1,13 +1,18 @@
 package com.example.eternal_games.repository;
 
+import android.net.Uri;
+
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
 import com.example.eternal_games.model.CarritoItem;
 import com.example.eternal_games.model.Producto;
+import com.google.firebase.firestore.FieldValue;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class CartRepository {
 
@@ -94,7 +99,6 @@ public class CartRepository {
         vaciar();
     }
 
-
     public void cargarRawDesdeFirebase(java.util.function.Consumer<List<CarritoItem>> onLoaded) {
         if (cargado) {
             onLoaded.accept(carrito.getValue());
@@ -110,6 +114,46 @@ public class CartRepository {
                 },
                 e -> onLoaded.accept(new ArrayList<>())
         );
+    }
+    public void registrarCompra() {
+        List<CarritoItem> items = carrito.getValue();
+        if (items == null || items.isEmpty()) return;
+
+        //encabezado
+        Map<String, Object> compra = new HashMap<>();
+        compra.put("fecha", FieldValue.serverTimestamp());
+        compra.put("leido", false);
+        String direccion = "Av. Corrientes 1234, CABA";
+        String mapsUrl = "https://www.google.com/maps/search/?api=1&query=" + Uri.encode(direccion);
+        compra.put("ubicacionRetiro", mapsUrl);
+
+        //detalle
+        List<Map<String, Object>> productos = new ArrayList<>();
+        int cantidadTotal = 0;
+        double totalGeneral = 0.0;
+
+        for (CarritoItem item : new ArrayList<>(items)) {
+            Map<String, Object> p = new HashMap<>();
+            p.put("idProducto", item.producto.id);
+            p.put("titulo", item.producto.title);
+            p.put("cantidad", item.cantidad);
+            p.put("precioUnitario", item.producto.price);
+            productos.add(p);
+            // Calcular totales
+            cantidadTotal += item.cantidad;
+            totalGeneral += item.cantidad * item.producto.price;
+
+        }
+        compra.put("productos", productos);
+        compra.put("cantidadTotal", cantidadTotal);
+        compra.put("totalGeneral", totalGeneral);
+
+        //Delegar en FirebaseRepository
+        repo.insertarCompra(compra,
+                aVoid -> {},   // éxito sin acción
+                e -> {}    // error sin acción
+        );
+
     }
 
 

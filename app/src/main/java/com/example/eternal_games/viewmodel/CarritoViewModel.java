@@ -51,6 +51,7 @@ public class CarritoViewModel extends ViewModel {
 
     // Finalizar compra: borrar todos (Firebase) y vaciar memoria
     public void finalizarCompra() {
+        cartRepo.registrarCompra();
         List<CarritoItem> items = carrito.getValue();
         if (items == null || items.isEmpty()) return;
 
