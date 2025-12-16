@@ -31,6 +31,11 @@
         <activity
             android:name=".ui.LoginActivity"
             android:exported="true" />
+        <activity
+            android:name=".ui.CompraDetalleActivity"
+            android:theme="@style/Theme.EternalGames.Dialog.Light"
+            android:exported="false" />
     </application>
+
 
 </manifest>

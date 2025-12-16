@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp">
+
+
+    <androidx.cardview.widget.CardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:elevation="8dp"
+        android:layout_margin="8dp"
+        app:cardCornerRadius="12dp">
+
+
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/colorFondoClaro"
+            android:padding="16dp">
+
+
+            <!-- ID de compra -->
+            <TextView
+                android:id="@+id/txtCompraId"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Compra #"
+                android:textStyle="bold"
+                android:textSize="18sp"
+                android:paddingBottom="8dp"/>
+
+
+            <!-- Fecha -->
+            <TextView
+                android:id="@+id/txtFecha"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Fecha"
+                android:textColor="#666666"
+                android:paddingBottom="12dp"/>
+
+
+            <!-- Divider -->
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="#DDDDDD"
+                android:layout_marginBottom="12dp"/>
+
+
+            <!-- Lista de productos -->
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recyclerProductos"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:scrollbars="vertical"
+                android:paddingBottom="12dp"/>
+
+
+            <!-- Divider -->
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="#DDDDDD"
+                android:layout_marginBottom="12dp"/>
+
+
+            <!-- Total general -->
+            <TextView
+                android:id="@+id/txtTotalGeneral"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Total: $0"
+                android:textStyle="bold"
+                android:textSize="16sp"
+                android:paddingBottom="12dp"/>
+
+
+            <!-- Ubicación de retiro -->
+            <TextView
+                android:id="@+id/txtUbicacionRetiro"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Ubicación de retiro"
+                android:autoLink="web"
+                android:textColor="@color/ButtonAccionAzul"
+                android:paddingBottom="12dp"/>
+
+
+            <!-- Botón de cierre -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnCerrar"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Cerrar"
+                android:textAlignment="center"
+                android:gravity="center"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="16dp"
+                app:cornerRadius="16dp"
+                app:backgroundTint="@color/blackdarkbutton"
+                style="@style/Widget.MaterialComponents.Button" />
+        </LinearLayout>
+    </androidx.cardview.widget.CardView>
+</ScrollView>
+

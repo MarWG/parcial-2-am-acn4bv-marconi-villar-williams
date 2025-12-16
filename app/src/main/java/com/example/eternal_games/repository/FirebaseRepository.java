@@ -1,7 +1,5 @@
 package com.example.eternal_games.repository;
-
 import android.util.Log;
-
 import com.example.eternal_games.model.CarritoItem;
 import com.example.eternal_games.model.Compra;
 import com.example.eternal_games.model.Producto;
@@ -17,25 +15,24 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.firestore.SetOptions;
-
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 public class FirebaseRepository {
     private final FirebaseAuth auth;
     private final FirebaseFirestore db;
-
     public FirebaseRepository() {
         auth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
     }
 
+
     public FirebaseUser obtenerUsuarioActual() {
         return auth.getCurrentUser();
     }
+
 
     public boolean estaLogueado() {
         return obtenerUsuarioActual() != null;
@@ -53,9 +50,11 @@ public class FirebaseRepository {
                 .addOnFailureListener(failure);
     }
 
+
     public void cerrarSesion() {
         auth.signOut();
     }
+
 
     //Registrar Usuarioen forma tradicional
     public void registrarUsuario(String email, String password,
@@ -77,6 +76,8 @@ public class FirebaseRepository {
     }
 
 
+
+
     //Registrar Usuarioen en una tabla para manejar roles en react o futuros campos dentro dle perfil
     public void crearDocumentoUsuario(FirebaseUser user,
                                       OnSuccessListener<Void> success,
@@ -87,6 +88,7 @@ public class FirebaseRepository {
         datosUsuario.put("createdAt", FieldValue.serverTimestamp());
         datosUsuario.put("updatedAt", FieldValue.serverTimestamp());
 
+
         FirebaseFirestore.getInstance()
                 .collection("users")
                 .document(user.getUid())
@@ -94,6 +96,7 @@ public class FirebaseRepository {
                 .addOnSuccessListener(success)
                 .addOnFailureListener(failure);
     }
+
 
     // agregar producto carrito
     public void agregarAlCarrito(String userId, String idProducto, int cantidad,
@@ -104,10 +107,12 @@ public class FirebaseRepository {
                 .collection("cart")
                 .document(idProducto);
 
+
         Map<String, Object> item = new HashMap<>();
         item.put("idProducto", idProducto);
         item.put("cantidad", cantidad);
         item.put("fechaAgregado", FieldValue.serverTimestamp());
+
 
         itemRef.set(item, SetOptions.merge())
                 .addOnSuccessListener(success)
@@ -118,11 +123,13 @@ public class FirebaseRepository {
         return user != null ? user.getUid() : null;
     }
 
+
     // obtener carrito del usuario
     public void obtenerCarritoUsuario(String userId,
                                       OnSuccessListener<List<CarritoItem>> success,
                                       OnFailureListener failure) {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
+
 
         db.collection("users")
                 .document(userId)
@@ -133,6 +140,7 @@ public class FirebaseRepository {
                     for (DocumentSnapshot doc : querySnapshot) {
                         String idProducto = doc.getString("idProducto");
                         Long cantidad = doc.getLong("cantidad");
+
 
                         if (idProducto != null && cantidad != null) {
                             Producto producto = new Producto();
@@ -145,11 +153,13 @@ public class FirebaseRepository {
                 .addOnFailureListener(failure);
     }
 
+
     ///obtenemos mail del usuairo conecatdo
     public String obtenerMailActual() {
         FirebaseUser user = auth.getCurrentUser();
         return (user != null) ? user.getEmail() : null;
     }
+
 
     ///elimina productos del carrito del usuario en fiberbase
     public void eliminarDelCarrito(String userId, String productoId,
@@ -163,6 +173,7 @@ public class FirebaseRepository {
                 .addOnSuccessListener(success)
                 .addOnFailureListener(failure);
     }
+
 
     ///trae todos lo productos lo centralizamos en fiberebse repositorio
     public void obtenerProductos(OnSuccessListener<QuerySnapshot> success,
@@ -190,11 +201,13 @@ public class FirebaseRepository {
         data.put("category", producto.category);
         data.put("img", producto.imgUrl);
 
+
         db.collection("productos")
                 .document()
                 .set(data)
                 .addOnSuccessListener(success)
                 .addOnFailureListener(failure);
+
 
     }
     public void insertarCompra(Map<String, Object> compra,
@@ -206,6 +219,7 @@ public class FirebaseRepository {
             return;
         }
 
+
         FirebaseFirestore.getInstance()
                 .collection("users")
                 .document(uid)
@@ -216,6 +230,7 @@ public class FirebaseRepository {
                 })
                 .addOnFailureListener(failure);
     }
+
 
     public void obtenerComprasUsuario(String userId,
                                       OnSuccessListener<List<Compra>> success,
@@ -249,4 +264,34 @@ public class FirebaseRepository {
                 .addOnSuccessListener(aVoid -> Log.d("Repo", "Campo 'leido' actualizado"))
                 .addOnFailureListener(e -> Log.e("Repo", "Error al actualizar", e));
     }
+
+
+    public void obtenerCompraPorId(String compraId,
+                                   OnSuccessListener<DocumentSnapshot> success,
+                                   OnFailureListener failure) {
+        String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        FirebaseFirestore.getInstance()
+                .collection("users")
+                .document(uid)
+                .collection("compras")
+                .document(compraId)
+                .get()
+                .addOnSuccessListener(success)
+                .addOnFailureListener(failure);
+    }
+
+
+    public void obtenerProductoPorId(String productoId,
+                                     OnSuccessListener<DocumentSnapshot> success,
+                                     OnFailureListener failure) {
+        FirebaseFirestore.getInstance()
+                .collection("productos")
+                .document(productoId)
+                .get()
+                .addOnSuccessListener(success)
+                .addOnFailureListener(failure);
+    }
+
+
 }
+
