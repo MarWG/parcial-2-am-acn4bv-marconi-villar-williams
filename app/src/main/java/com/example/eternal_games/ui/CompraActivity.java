@@ -3,6 +3,7 @@ package com.example.eternal_games.ui;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -24,9 +25,19 @@ public class CompraActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_compra);
+        ImageButton btnInicio = findViewById(R.id.btnInicio);
 
         RecyclerView recyclerView = findViewById(R.id.recyclerCompras);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
+
+        ImageButton btnContacto = findViewById(R.id.btnContacto);
+
+        btnContacto.setOnClickListener(v -> {
+            Intent intent = new Intent(CompraActivity.this, CompraActivity.class);
+            startActivity(intent);
+        });
+
+        btnInicio.setOnClickListener(v -> volverAMain());
 
         adapter = new CompraAdapter();
         recyclerView.setAdapter(adapter);
@@ -59,5 +70,12 @@ public class CompraActivity extends AppCompatActivity {
             ImageView badge = findViewById(R.id.ic_notificacion);
             badge.setVisibility(hayNoLeidas ? View.VISIBLE : View.GONE);
         });
+    }
+
+    private void volverAMain() {
+        Intent intent = new Intent(this, MainActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        startActivity(intent);
+        finish();
     }
 }

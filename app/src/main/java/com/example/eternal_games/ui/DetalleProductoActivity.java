@@ -48,6 +48,12 @@ public class DetalleProductoActivity extends AppCompatActivity {
         fabCarrito = findViewById(R.id.fabCarrito);
         badgeCantidad = findViewById(R.id.badgeCantidad);
         ImageButton btnInicio = findViewById(R.id.btnInicio);
+        ImageButton btnContacto = findViewById(R.id.btnContacto);
+
+        btnContacto.setOnClickListener(v -> {
+            Intent intent = new Intent(DetalleProductoActivity.this, CompraActivity.class);
+            startActivity(intent);
+        });
 
 
         // Observar carrito => el badge se actualiza solo

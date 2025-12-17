@@ -44,6 +44,12 @@ public class CarritoActivity extends AppCompatActivity {
         txtCantidadTotal = findViewById(R.id.txtCantidadTotal);
         btnFinalizarCompra = findViewById(R.id.btnFinalizarCompra);
         ImageButton btnInicio = findViewById(R.id.btnInicio);
+        ImageButton btnContacto = findViewById(R.id.btnContacto);
+
+        btnContacto.setOnClickListener(v -> {
+            Intent intent = new Intent(CarritoActivity.this, CompraActivity.class);
+            startActivity(intent);
+        });
 
         // ViewModel
         carritoViewModel = new ViewModelProvider(this).get(CarritoViewModel.class);
